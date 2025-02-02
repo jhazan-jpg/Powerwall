@@ -154,7 +154,7 @@ def on_message_to_gateway(mosq, obj, msg):
         logging.error("Tesla Gateway Error: " + str(sys.exc_info()[1]))
               
 
-def publishPowerwallValues():
+async def publishPowerwallValues():
     global commStarted
     global repeatRun
 
@@ -171,14 +171,25 @@ def publishPowerwallValues():
             nodename = makeNodeName(cmd['name'])
             node = MainRoot + "/" + nodename
 
-            powerwall_capacity = powerwall.get_capacity()
-            powerwall_charge = powerwall.get_charge()
-            powerwall_energy = powerwall.get_energy()
-            meters = powerwall.get_meters()
+            powerwall_capacity = await powerwall.get_capacity()
+            powerwall_charge = await powerwall.get_charge()
+            powerwall_energy = await powerwall.get_energy()
+            meters = await powerwall.get_meters()
+            powerwall_battery_power = meters.battery.get_power()
+            powerwall_load_power = meters.load.get_power()
+            powerwall_solar_power = meters.solar.get_power()
+            powerwall_site_power = meters.site.get_power()
+            powerwall_solar_energy_exported = meters.solar.get_energy_exported()
+            powerwall_solar_energy_imported = meters.solar.get_energy_imported()
+            powerwall_site_energy_imported = meters.site.get_energy_imported()
+            powerwall_site_energy_exported = meters.site.get_energy_exported()
+            powerwall_load_energy_imported = meters.load.get_energy_imported()
+            powerwall_battery_energy_imported = meters.battery.get_energy_imported()
+            powerwall_battery_energy_exported = meters.battery.get_energy_exported()
 
-            solar_meter_details = powerwall.get_meter_solar()
+            solar_meter_details = await powerwall.get_meter_solar()
             solar_readings = solar_meter_details.readings
-            site_meter_details = powerwall.get_meter_site()
+            site_meter_details = await powerwall.get_meter_site()
             site_readings = site_meter_details.readings
 
             result = eval(cmd['addr'])
@@ -233,38 +244,38 @@ def publishPowerwallValues():
 #       sys.exit(1)
 
 readCmds = [
-        { 'addr':'powerwall.get_charge()', 'datatype':'float', 'unit':'%', 'name':'Powerwall Charge'},
+        { 'addr':'powerwall_charge', 'datatype':'float', 'unit':'%', 'name':'Powerwall Charge'},
         { 'addr':'powerwall_energy', 'datatype':'integer', 'unit':'Wh', 'name':'Powerwall Energy'},
         { 'addr':'powerwall_capacity', 'datatype':'integer', 'unit':'Wh', 'name':'Powerwall Capacity'},
         { 'addr':'site_readings.instant_power', 'datatype':'integer', 'unit':'W', 'name':'Site: Instant Power'},
         { 'addr':'meters.battery.instant_power', 'datatype':'integer', 'unit':'W', 'name':'Battery: Instant Power'},
-        { 'addr':'meters.battery.get_power()', 'datatype':'float', 'unit':'kW', 'name':'Battery: Power'},
+        { 'addr':'powerwall_battery_power', 'datatype':'float', 'unit':'kW', 'name':'Battery: Power'},
         { 'addr':'meters.load.instant_power', 'datatype':'integer', 'unit':'W', 'name':'Load: Instant Power'},
-        { 'addr':'meters.load.get_power()', 'datatype':'float', 'unit':'kW', 'name':'Load: Power'},
+        { 'addr':'powerwall_load_power', 'datatype':'float', 'unit':'kW', 'name':'Load: Power'},
         { 'addr':'meters.solar.instant_power', 'datatype':'integer', 'unit':'W', 'name':'Solar: Instant Power'},
-        { 'addr':'meters.solar.get_power()', 'datatype':'float', 'unit':'kW', 'name':'Solar: Power'},
+        { 'addr':'powerwall_solar_power', 'datatype':'float', 'unit':'kW', 'name':'Solar: Power'},
         { 'addr':'site_readings.real_power_a', 'datatype':'integer', 'unit':'W', 'name':'Site: Real Power A'},
         { 'addr':'site_readings.real_power_b', 'datatype':'integer', 'unit':'W', 'name':'Site: Real Power B'},
         { 'addr':'site_readings.real_power_c', 'datatype':'integer', 'unit':'W', 'name':'Site: Real Power C'},
-        { 'addr':'meters.site.get_power()', 'datatype':'float', 'unit':'kW', 'name':'Site: Power'},
+        { 'addr':'powerwall_site_power', 'datatype':'float', 'unit':'kW', 'name':'Site: Power'},
         { 'addr':'solar_readings.energy_exported', 'datatype':'float', 'unit':'Wh', 'name':'Solar: Energy Exported'},
-        { 'addr':'meters.solar.get_energy_exported()', 'datatype':'float', 'unit':'kWh', 'name':'Solar: Energy Exported (kWh)'},
+        { 'addr':'powerwall_solar_energy_exported', 'datatype':'float', 'unit':'kWh', 'name':'Solar: Energy Exported (kWh)'},
         { 'addr':'solar_readings.energy_imported', 'datatype':'float', 'unit':'Wh', 'name':'Solar: Energy Imported'},
-        { 'addr':'meters.solar.get_energy_imported()', 'datatype':'float', 'unit':'kWh', 'name':'Solar: Energy Imported (kWh)'},
+        { 'addr':'powerwall_solar_energy_imported', 'datatype':'float', 'unit':'kWh', 'name':'Solar: Energy Imported (kWh)'},
         { 'addr':'site_readings.energy_exported', 'datatype':'float', 'unit':'Wh', 'name':'Site: Energy Exported'},
         { 'addr':'site_readings.energy_imported', 'datatype':'float', 'unit':'Wh', 'name':'Site: Energy Imported'},
-        { 'addr':'meters.site.get_energy_imported()', 'datatype':'float', 'unit':'kWh', 'name':'Site: Energy Imported (kWh)'},
-        { 'addr':'meters.site.get_energy_exported()', 'datatype':'float', 'unit':'kWh', 'name':'Site: Energy Exported (kWh)'},
+        { 'addr':'powerwall_site_energy_imported', 'datatype':'float', 'unit':'kWh', 'name':'Site: Energy Imported (kWh)'},
+        { 'addr':'powerwall_site_energy_exported', 'datatype':'float', 'unit':'kWh', 'name':'Site: Energy Exported (kWh)'},
         { 'addr':'meters.load.energy_imported', 'datatype':'float', 'unit':'Wh', 'name':'Load: Energy Imported'},
-        { 'addr':'meters.load.get_energy_imported()', 'datatype':'float', 'unit':'kWh', 'name':'Load: Energy Imported (kWh)'},
+        { 'addr':'powerwall_load_energy_imported', 'datatype':'float', 'unit':'kWh', 'name':'Load: Energy Imported (kWh)'},
         { 'addr':'meters.battery.energy_imported', 'datatype':'integer', 'unit':'Wh', 'name':'Battery: Energy Imported'},
-        { 'addr':'meters.battery.get_energy_imported()', 'datatype':'float', 'unit':'kWh', 'name':'Battery: Energy Imported (kWh)'},
+        { 'addr':'powerwall_battery_energy_imported', 'datatype':'float', 'unit':'kWh', 'name':'Battery: Energy Imported (kWh)'},
         { 'addr':'meters.battery.energy_exported', 'datatype':'integer', 'unit':'Wh', 'name':'Battery: Energy Exported'},
-        { 'addr':'meters.battery.get_energy_exported()', 'datatype':'float', 'unit':'kWh', 'name':'Battery: Energy Exported (kWh)'},
+        { 'addr':'powerwall_battery_energy_exported', 'datatype':'float', 'unit':'kWh', 'name':'Battery: Energy Exported (kWh)'},
 
           ]
 
-def getPowerwallValues():
+async def getPowerwallValues():
     logging.debug("Starting get values loop")
     # print("Starting get values loop")
     try:
@@ -272,7 +283,7 @@ def getPowerwallValues():
             if pauseRun:
                 logging.info("Reading values paused")
             else:
-                publishPowerwallValues()
+                await publishPowerwallValues()
             logging.info(f"Sleep for {SLEEPTIME}s")
             time.sleep(SLEEPTIME)
     except:
@@ -312,7 +323,7 @@ def sigterm_handler(signal, frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-def main():
+async def main():
     global powerwall, commStarted, client, HomieRoot, SystemRoot, MainRoot
     global SystemMessage, SystemAlarm, SystemLastSeen, SystemSleeptime
     global SystemReread, SystemRelaunch, SystemPause
@@ -322,7 +333,7 @@ def main():
 
     try:
         powerwall = Powerwall(GatewayIP)
-        powerwall.login(GatewayPassword, GatewayEmail)
+        await powerwall.login(GatewayPassword, GatewayEmail)
         commStarted = True
 
         HomieRoot = 'homie/powerwall/'
@@ -418,7 +429,7 @@ def main():
         client.publish(HomieRoot + "$state", "ready", 1, True)
         client.publish(SystemMessage, "Service initialised", 1, True)
 
-        getPowerwallValues()
+        await getPowerwallValues()
 
 
 
@@ -434,4 +445,4 @@ def main():
     finally:
         logging.info("Service terminated")
 
-main()
+asyncio.run(main())
