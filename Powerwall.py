@@ -312,7 +312,11 @@ def sigterm_handler(signal, frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-if __name__ == '__main__':
+def main():
+    global powerwall, commStarted, client, HomieRoot, SystemRoot, MainRoot
+    global SystemMessage, SystemAlarm, SystemLastSeen, SystemSleeptime
+    global SystemReread, SystemRelaunch, SystemPause
+    
     myformat = "Powerwall: %(message)s"
     logging.basicConfig(format=myformat, level=logLevel)
 
@@ -430,4 +434,4 @@ if __name__ == '__main__':
     finally:
         logging.info("Service terminated")
 
-
+main()
