@@ -160,6 +160,29 @@ async def publishPowerwallValues():
 
     if commStarted:
 
+        powerwall_capacity = await powerwall.get_capacity()
+        powerwall_charge = await powerwall.get_charge()
+        powerwall_energy = await powerwall.get_energy()
+        meters = await powerwall.get_meters()
+        powerwall_battery_power = meters.battery.get_power()
+        powerwall_load_power = meters.load.get_power()
+        powerwall_solar_power = meters.solar.get_power()
+        powerwall_site_power = meters.site.get_power()
+        powerwall_solar_energy_exported = meters.solar.get_energy_exported()
+        powerwall_solar_energy_imported = meters.solar.get_energy_imported()
+        powerwall_site_energy_imported = meters.site.get_energy_imported()
+        powerwall_site_energy_exported = meters.site.get_energy_exported()
+        powerwall_load_energy_imported = meters.load.get_energy_imported()
+        powerwall_battery_energy_imported = meters.battery.get_energy_imported()
+        powerwall_battery_energy_exported = meters.battery.get_energy_exported()
+
+
+        solar_meter_details = await powerwall.get_meter_solar()
+        solar_readings = solar_meter_details.readings
+        site_meter_details = await powerwall.get_meter_site()
+        site_readings = site_meter_details.readings
+
+
         for cmd in readCmds:
             if pauseRun:
                 logging.info("Stopped publishing values because of pause")
@@ -170,28 +193,6 @@ async def publishPowerwallValues():
 
             nodename = makeNodeName(cmd['name'])
             node = MainRoot + "/" + nodename
-
-            powerwall_capacity = await powerwall.get_capacity()
-            powerwall_charge = await powerwall.get_charge()
-            powerwall_energy = await powerwall.get_energy()
-            meters = await powerwall.get_meters()
-            powerwall_battery_power = meters.battery.get_power()
-            powerwall_load_power = meters.load.get_power()
-            powerwall_solar_power = meters.solar.get_power()
-            powerwall_site_power = meters.site.get_power()
-            powerwall_solar_energy_exported = meters.solar.get_energy_exported()
-            powerwall_solar_energy_imported = meters.solar.get_energy_imported()
-            powerwall_site_energy_imported = meters.site.get_energy_imported()
-            powerwall_site_energy_exported = meters.site.get_energy_exported()
-            powerwall_load_energy_imported = meters.load.get_energy_imported()
-            powerwall_battery_energy_imported = meters.battery.get_energy_imported()
-            powerwall_battery_energy_exported = meters.battery.get_energy_exported()
-
-            solar_meter_details = await powerwall.get_meter_solar()
-            solar_readings = solar_meter_details.readings
-            site_meter_details = await powerwall.get_meter_site()
-            site_readings = site_meter_details.readings
-
             result = eval(cmd['addr'])
 
             # Some kind of error, probably non fatal
