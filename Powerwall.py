@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/jon/Powerwall/.venv/bin/python
 # -*- coding: utf-8 -*-
 
 import sys
@@ -53,17 +53,17 @@ def wait100ms():
         sys.exit(0)
     time.sleep(0.1)
 
-def connecthandler(mqc,userdata,flags,rc):
+def connecthandler(mqc,userdata,flags,reason_code, properties):
     global droppedConnection
-    logging.info("Connected to MQTT broker with rc=%d" % (rc))
+    logging.info(f"Connected to MQTT broker with reason code {reason_code}")
     if droppedConnection:
         logging.info("Dropped connection detected, setting Homie state to ready")
         client.publish(HomieRoot + "$state", "ready", 1, True)
         droppedConnection = False
 
-def disconnecthandler(mqc,userdata,rc):
+def disconnecthandler(mqc,userdata,flags,reason_code, properties):
     global droppedConnection
-    logging.error(f"Disconnected from MQTT broker with rc = {rc}")
+    logging.error(f"Disconnected from MQTT broker with reason code {reason_code}")
     droppedConnection = True
 
 def on_message_to_gateway(mosq, obj, msg):
@@ -338,7 +338,7 @@ async def main():
         commStarted = True
 
         HomieRoot = 'homie/powerwall/'
-        client=mqtt.Client(client_id = "powerwall", clean_session = False)
+        client=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id = "powerwall", clean_session = False)
 
 #        client.username_pw_set(username=MQTT_USER,password=MQTT_PASSWORD)
         client.on_connect=connecthandler
